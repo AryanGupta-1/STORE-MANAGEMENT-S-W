@@ -780,6 +780,8 @@ class App(Tk):
 
 
         '''
+        
+        Create a function or a line of code to fetch last Product No. from Databbase & update the  Database accordingly.
         P_ID   INTEGER     PRIMARY KEY     AUTOINCREMENT,
         P_NO    INTEGER,
         P_NAME  TEXT,
