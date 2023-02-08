@@ -1,1 +1,1 @@
-# STORE-MANAGEMENT-S-W
+Store Management Software
