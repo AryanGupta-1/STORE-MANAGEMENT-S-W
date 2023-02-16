@@ -1,0 +1,907 @@
+# from re import escape
+from tkinter import *
+from tkinter import ttk
+import pyttsx3
+import time
+from tkinter import messagebox as msb
+import sqlite3
+
+
+
+
+
+class App(Tk):
+
+    def __init__(self):
+        super().__init__()
+
+        self.title("Fresh Fruits & Veggies")
+        self.geometry("700x500")
+
+        self.mymenu = Menu(self)
+
+
+        self.m1 = Menu(self.mymenu, tearoff = 0)
+
+        self.m1.add_command(label = "Create New Order", command  = self.CreateOrder)
+        self.m1.add_command(label = "Cancel Order", command = self.Search)
+        self.m1.add_command(label = "Search Order", command = self.Search)
+        self.m1.add_command(label = "Inventory Mangement", command = self.Inventory)
+
+
+        self.mymenu.add_cascade(label = "File", menu = self.m1)
+
+        self.m2 = Menu(self.mymenu, tearoff = 0)
+
+        self.m2.add_command(label = "Modify Existing Order", command = self.Search)
+
+        self.mymenu.add_cascade(label = "Edit", menu = self.m2)
+
+
+        self.mymenu.add_command(label = "Home", command = self.main)
+
+        self.config(menu = self.mymenu)
+
+        self.CFrame = Frame(self)
+        self.MFrame = Frame(self)
+        self.SFrame = Frame(self)
+        self.VFrame = Frame(self)
+
+
+        self.SFrame.grid()
+        self.CFrame.grid()
+        self.MFrame.grid()
+
+        self.main()
+
+
+    def main(self):
+
+        self.SFrame.grid_remove()
+        self.CFrame.grid_remove()
+        self.MFrame.grid()
+
+        for i in self.MFrame.winfo_children():
+            i.destroy()
+
+
+        Label(self.MFrame, text = "Fresh Fruits & Veggies", font = ("Segoe Print", 20, "bold"), pady = 20, padx = 10).grid(row = 0, column = 3)
+
+        Button(self.MFrame, text = "CREATE ORDER",      width = 20, bg = "GREEN",   fg = "WHITE", font = ("Calibri", 12, "bold"), command = self.CreateOrder).  grid(row = 4, column = 3)
+
+        Button(self.MFrame, text = "SEARCH ORDER",      width = 20, bg = "ORANGE",  fg = "BLACK", font = ("Calibri", 12, "bold"), command = self.Search).       grid(row = 4, column = 5, pady = 5)
+
+        Button(self.MFrame, text = "CANCEL ORDER",      width = 20, bg = "RED",     fg = "WHITE", font = ("Calibri", 12, "bold"), command = self.Search).       grid(row = 6, column = 3)
+
+        Button(self.MFrame, text = "VIEW ALL ORDERS",   width = 20, bg = "BLUE",    fg = "WHITE", font = ("Calibri", 12, "bold"), command = self.View).         grid(row = 6, column = 5, pady = 5)
+
+        Button(self.MFrame, text = "MODIFY ORDER",      width = 20, bg = "YELLOW",  fg = "BLACK", font = ("Calibri", 12, "bold"), command = self.Search).       grid(row = 7, column = 3, pady = 5)
+
+        Button(self.MFrame, text = "ADD PRODUCT",       width = 20, bg = "PURPLE",  fg = "BLACK", font = ("Calibri", 12, "bold"), command = self.Search).       grid(row = 7, column = 3, pady = 5)
+
+
+
+    def CreateOrder(self, modify = 0):
+
+        for i in self.CFrame.winfo_children():
+            i.destroy()
+
+
+        i = 0
+        self.change = 0
+
+        self.MFrame.grid_remove()
+        self.SFrame.grid_remove()
+        self.CFrame.grid()
+
+        self.name = StringVar()
+        self.phone = StringVar()
+        self.add = StringVar()
+        self.requirement = StringVar()
+        self.notes = StringVar()
+        self.hrs = IntVar()
+        self.min = IntVar()
+        self.am_pm = StringVar()
+        self.daily = IntVar()
+
+        self.hrs.set(0)
+        self.min.set(0)
+
+
+
+        self.E1 = Entry(self.CFrame, textvariable = self.name, width = 40, borderwidth = 2, relief = GROOVE)
+        self.E2 = Entry(self.CFrame, textvariable = self.phone, width = 40, borderwidth = 2, relief = GROOVE)
+        self.E3 = Entry(self.CFrame, textvariable = self.add, width = 40, borderwidth = 2, relief = GROOVE)
+        self.E4 = Entry(self.CFrame, textvariable = self.requirement, width = 40, borderwidth = 2, relief = GROOVE)
+        self.E5 = Entry(self.CFrame, textvariable = self.notes, width = 40, borderwidth = 2, relief = GROOVE)
+        self.E6 = Entry(self.CFrame, textvariable = self.hrs, width = 3, relief = GROOVE)
+        self.E7 = Entry(self.CFrame, textvariable = self.min, width = 3, relief = GROOVE)
+
+        self.CB = Checkbutton(self.CFrame, text = "Schedule for Daily", variable = self.daily)
+
+
+        Label(self.CFrame, text = "Fresh Fruits & Veggies", font = ("Segoe Print", 20, "bold"), pady = 20).grid(row = 0, column = 1, columnspan = 10, sticky = EW)
+
+        if modify == 1:
+            self.change = 1
+            i = 7
+
+            Label(self.CFrame, text = "Name                                :   " + self.row[2], font = ("Calibri")).grid(row = 1, column = 1, sticky = W)
+
+            Label(self.CFrame, text = "Phone No.                         :   " + self.row[3], font = ("Calibri")).grid(row = 2, column = 1, sticky = W)
+
+            Label(self.CFrame, text = "Address                             :   " + self.row[4], font = ("Calibri")).grid(row = 3, column = 1, sticky = W)
+
+            Label(self.CFrame, text = "Requirement                     :   " + self.row[5], font = ("Calibri")).grid(row = 4, column = 1, sticky = W)
+
+            Label(self.CFrame, text = "Notes                                :   " + self.row[7], font = ("Calibri")).grid(row = 5, column = 1, sticky = W)
+
+            Label(self.CFrame, text = "Schedule For Daily            :   " + self.row[6], font = ("Calibri")).grid(row = 6, column = 1, sticky = W)
+
+
+            Label(self.CFrame, text = "______________________________________________________________________________").grid(row = 7, column = 1, columnspan = 10, pady = 10)
+
+
+
+        Label(self.CFrame, text = "").grid(row = 1, column = 0)
+
+        Label(self.CFrame, text = "Name\t\t:   ", font = ("Calibri")).grid(row = i + 1, column = 1, sticky = W)
+        Label(self.CFrame, text = "Phone No.\t:   ", font = ("Calibri")).grid(row = i + 2, column = 1, sticky = W)
+        Label(self.CFrame, text = "Address\t\t:   ", font = ("Calibri")).grid(row = i + 3, column = 1, sticky = W)
+        Label(self.CFrame, text = "Requirement\t:   ", font = ("Calibri")).grid(row = i + 4, column = 1, sticky = W)
+        Label(self.CFrame, text = "Notes\t\t:   ", font = ("Calibri")).grid(row = i + 5, column = 1, sticky = W)
+        Label(self.CFrame, text = "Time\t\t:   ", font = ("Calibri")).grid(row = i + 6, column = 1, sticky = W)
+
+        self.E1.grid(row = i + 1, column = 3, sticky = E, pady = 4, columnspan = 3)
+        self.E2.grid(row = i + 2, column = 3, sticky = E, pady = 4, columnspan = 3)
+        self.E3.grid(row = i + 3, column = 3, sticky = E, pady = 4, columnspan = 3)
+        self.E4.grid(row = i + 4, column = 3, sticky = E, pady = 4, columnspan = 3)
+        self.E5.grid(row = i + 5, column = 3, sticky = E, pady = 4, columnspan = 3)
+        self.E6.grid(row = i + 6, column = 3, pady = 4, sticky = W)
+        # Label(self.CFrame, text = ":").grid(row = i + 6, column = 3, sticky = E)
+        self.E7.grid(row = i + 6, column = 3, sticky = E)
+
+        self.CB.grid(row = i + 7, column = 4, sticky = W)
+
+        options = ["am", "pm"]
+
+        self.daily_schedule = OptionMenu(self.CFrame, self.am_pm, *options)
+
+        self.daily_schedule.grid(row = i + 6, column = 4, sticky = W)
+
+
+        Button(self.CFrame, text = "Submit", command = self.FeedData).grid(row = i + 8, column = 4, sticky = W)
+
+
+
+    def FeedData(self):
+
+        col = []
+
+        self.Name = self.name.get().upper()
+        if len(self.Name) == 0:
+            self.Name = "N/A"
+
+        self.Phone = self.phone.get().upper()
+        self.Address = self.add.get().upper()
+        self.Requirement = self.requirement.get().upper()
+        self.Daily = self.daily.get()
+
+        DAILY = ["NO", "YES"]
+
+        self.Notes = self.notes.get().upper()
+        self.T = time.asctime(time.localtime(time.time()))
+
+        try:
+            self.Hr = self.hrs.get()
+        except:
+            msb.showerror("", "INVALID TIME")
+            self.CreateOrder()
+        
+
+        try:
+            self.Min = self.min.get()
+        except:
+            msb.showerror("", "INVALID TIME")
+            self.CreateOrder()
+
+        self.AM_PM = self.am_pm.get()
+
+        if self.AM_PM == "pm":
+            if self.Hr < 12:
+                self.Hr += 12
+        
+        elif self.Hr == 12:
+            self.Hr = 0
+
+
+        self.Time = str(self.Hr) + " : " + str(self.Min)
+
+
+
+        if len(self.Name)>0:
+            col.append("NAME = '" + self.Name + "'")
+        
+        if len(self.Phone)>0:
+            col.append("PHONE = '" + self.Phone + "'")
+        
+        if len(self.Address)>0:
+            col.append("ADDRESS = '" + self.Address + "'")
+        
+        if len(self.Requirement)>0:
+            col.append("REQUIREMENT = '" + self.Requirement + "'")
+
+
+        col.append("DAILY = '" + DAILY[self.Daily] + "'")
+
+        if len(self.Notes)>0:
+            col.append("NOTES = '" + self.Notes + "'")
+        
+        col.append("TIME = '" + str(self.Hr) + "' : '" + str(self.Min) + "'")
+
+        col.append("T = '" + self.T + "'")
+
+
+        columns = ", ".join(col)
+
+
+
+        if self.change == 0:
+            cur.execute("SELECT MAX(O_NO) FROM ONO")
+
+
+            self.O_NO = cur.fetchall()
+
+
+
+            self.O_NO = self.O_NO[0]
+            self.O_NO = self.O_NO[0]
+            self.O_NO =  int(self.O_NO)
+
+
+            Value = (self.O_NO + 1, self.Name, self.Phone, self.Address, self.Requirement, DAILY[self.Daily], self.Notes, self.Time, self.T)
+
+            # Insrting Data into SQL
+
+            insert_value= f"INSERT INTO ORDERS (O_NO, NAME, PHONE, ADDRESS, REQUIREMENT, DAILY, NOTES, TIME, T) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+
+            cur.execute(insert_value, Value)
+            conn.commit()
+
+            cur.execute("UPDATE ONO     SET O_NO = '" + str(self.O_NO + 1) + "' WHERE O_NO = '" + str(self.O_NO) + "'")
+
+            conn.commit()
+
+            cur.execute('''SELECT MAX(O_ID) FROM ORDERS''')
+
+            B = cur.fetchall()
+            B = B[0]
+            B = B[0]
+
+
+            cur.execute("SELECT MAX(O_NO) FROM ONO")
+
+            self.O_NO = cur.fetchall()
+            self.O_NO = self.O_NO[0]
+            self.O_NO = self.O_NO[0]
+
+
+            self.E1.delete(0, 'end')
+            self.E2.delete(0, 'end')
+            self.E3.delete(0, 'end')
+            self.E4.delete(0, 'end')
+            self.E5.delete(0, 'end')
+            self.CB.deselect()
+            self.E6.delete(0, 'end')
+            self.E7.delete(0, 'end')
+            
+            pyttsx3.speak("DONE")
+
+            msb.showinfo("Order Created", f"Your Order has been created with ORDER NO. #{self.O_NO}\n ORDER ID #FFV2021____{B}")
+
+        else:
+            mod_order = self.modify_order_no.get()
+
+            QUERY = "UPDATE ORDERS SET " + columns + "WHERE O_NO = '" + mod_order + "'"
+
+            cur.execute(QUERY)
+            conn.commit()
+
+            msb.showinfo("Modify Order", "Changes Saved to Order No. : " + mod_order)
+
+
+    def Search(self):
+
+        self.MFrame.grid_remove()
+        self.CFrame.grid_remove()
+        self.SFrame.grid()
+
+
+        try:
+            self.f2.grid_remove()
+        except:
+            pass
+
+        try:
+            self.f1.grid_remove()
+        except:
+            pass
+
+
+        self.f1 = Frame(self.SFrame)
+        self.f1.grid()
+
+        self.Scroll1 = Scrollbar(self.f1)
+
+        self.Scroll1.grid_forget()
+
+        self.oid = StringVar()
+        self.ono = StringVar()
+        self.c_name = StringVar()
+        self.ph_no = StringVar()
+        self.daily_sch = IntVar()
+
+        self.cancel_order_no = StringVar()
+        self.modify_order_no = StringVar()
+        self.confirm_order_no = StringVar()
+
+        self.ES1   = Entry(self.f1, textvariable = self.oid, width = 30, relief = GROOVE)
+        self.ES4   = Entry(self.f1, textvariable = self.ono, width = 30, relief = GROOVE)
+        self.ES2   = Entry(self.f1, textvariable = self.c_name, width = 30, relief = GROOVE)
+        self.ES3   = Entry(self.f1, textvariable = self.ph_no, width = 30, relief = GROOVE)
+        self.CO    = Entry(self.f1, textvariable = self.cancel_order_no, width = 5)
+        self.MO    = Entry(self.f1, textvariable = self.modify_order_no, width = 30)
+        self.ConfO = Entry(self.f1, textvariable = self.confirm_order_no, width = 30)
+
+
+
+        Label(self.f1, text = "Fresh Fruits & Veggies", font = ("Segoe Print", 20, "bold"), pady = 20).grid(row = 1, column = 2, padx = 10, ipadx = 20)
+
+        Label(self.f1, text = "Search In :-", font = ("Cambria", 16, "bold")).grid(row = 2, column = 1, padx = 10)
+
+        Label(self.f1, text = " Order ID.\t: ", font = (14)).grid(row = 3, column = 2, sticky = W, padx =10)
+        self.ES1.grid(row = 3, column = 2, pady = 5, sticky = E, columnspan=2)
+
+        Label(self.f1, text = " Order No.\t: ", font = (14)).grid(row = 4, column = 2, sticky = W, padx =10)
+        self.ES4.grid(row = 4, column = 2, pady = 5, sticky = E, columnspan=2)
+
+        Label(self.f1, text = " Name\t\t: ", font = (14)).grid(row = 5, column = 2, sticky = W, padx =10)
+        self.ES2.grid(row = 5, column = 2, pady = 5, sticky = E, columnspan=2)
+
+        Label(self.f1, text = " Phone No.\t: ", font = (14)).grid(row = 6, column = 2, sticky = W, padx =10)
+        self.ES3.grid(row = 6, column = 2, pady = 5, sticky = E, columnspan=2)
+
+        Label(self.f1, text = " Scheduled\t: ", font = (14)).grid(row = 7, column = 2, sticky = W, padx = 10)
+
+        Radiobutton(self.f1, text = "YES" , variable = self.daily_sch, value = 1).grid(row = 7 ,column = 2)
+        Radiobutton(self.f1, text = "NO"  , variable = self.daily_sch, value = 2).grid(row = 7 ,column = 2, sticky = NE, padx = 55)
+        Radiobutton(self.f1, text = "BOTH", variable = self.daily_sch, value = 3).grid(row = 7 ,column = 3, sticky = NE)
+
+
+        Button(self.f1, text = "Search", command = self.SearchA, font = ("ARIAL", 12, "bold"), width = 10, bg = "YELLOW").grid(row = 8, column = 1, columnspan = 3)
+
+
+    def SearchA(self):
+        OID = self.oid.get().upper()
+        ONO = self.ono.get().upper()
+        C_NAME = self.c_name.get().upper()
+        PH_NO = self.ph_no.get().upper()
+        Daily = self.daily_sch.get()
+
+        print(Daily)
+
+        SEARCH = ""
+
+        if len(OID) == 0:
+
+            if len(ONO) == 0:
+
+                if len(C_NAME) == 0:
+
+                    if len(PH_NO) == 0:
+
+                        if Daily == 3:
+                            SEARCH = "SELECT * FROM ORDERS"
+
+                        elif Daily == 1:
+                            SEARCH = "SELECT * FROM ORDERS WHERE DAILY = 'YES'"
+
+                        else:
+                            SEARCH = "SELECT * FROM ORDERS WHERE DAILY = 'NO'"
+
+                    else:
+                        if Daily == 3:
+                            SEARCH = "SELECT * FROM ORDERS WHERE PHONE = '" + self.PH_NO + "'"
+
+                        elif Daily == 1:
+                            SEARCH = "SELECT * FROM ORDERS WHERE PHONE = '" + self.PH_NO +"' AND DAILY = 'YES'"
+
+                        else:
+                            SEARCH = "SELECT * FROM ORDERS WHERE PHONE = '" + self.PH_NO +"' AND DAILY = 'NO'"
+
+                else:
+                    if len(PH_NO) == 0:
+
+                        if Daily == 3:
+                            SEARCH = "SELECT * FROM ORDERS WHERE NAME = '" + C_NAME + "'"
+
+                        elif Daily == 1:
+                            SEARCH = "SELECT * FROM ORDERS WHERE NAME = '" + C_NAME + "'AND DAILY = 'YES'"
+
+                        else:
+                            SEARCH = "SELECT * FROM ORDERS WHERE NAME = '" + C_NAME + "'AND DAILY = 'NO'"
+
+                    else:
+                        if Daily == 3:
+                            SEARCH = "SELECT * FROM ORDERS WHERE NAME = '" + C_NAME + "'AND PHONE = '" + PH_NO + "'"
+
+                        elif Daily == 1:
+                            SEARCH = "SELECT * FROM ORDERS WHERE NAME = '" + C_NAME + "'AND PHONE = '" + PH_NO +"' AND DAILY = 'YES'"
+
+                        else:
+                            SEARCH = "SELECT * FROM ORDERS WHERE NAME = '" + C_NAME + "'AND PHONE = '" + PH_NO +"' AND DAILY = 'NO'"
+            
+            else:
+                SEARCH = "SELECT * FROM ORDERS WHERE O_NO = '" + ONO + "'"
+        
+        else:
+            SEARCH = "SELECT * FROM ORDERS WHERE O_ID = '" + OID + "'"
+
+
+
+        if len(SEARCH)>0:
+            cur.execute(SEARCH)
+            row = cur.fetchall()
+
+
+            if len(row)>0:
+                Label(self.f1).grid(column = 3)
+
+                result = ""
+
+                for i in row:
+
+                    result = result + f"Booking No. :-  {i[1]}\n\n   Order ID				#FFV2021____{i[0]}\n   Name			:	{i[2]}\n   Phone No.			:	{i[3]}\n   Address			:	{i[4]}\n   Requirement			:	{i[5]}\n   Schedule For Daily			:	{i[6]}\n   Notes			:	{i[7]}\n   Time			:	{i[8]}\n\n\n"
+
+                self.Scroll1.grid(row = 2, column = 5, sticky = N+S, rowspan = 40)
+
+                self.T = Text(self.f1, yscrollcommand = self.Scroll1.set, font = ("Times New Roman", 14), width = 57, height = 25)
+
+                self.T.insert(END,result)
+
+                self.T.config(state = DISABLED)
+
+                self.T.grid(row = 2, column = 4, rowspan = 40, padx = 10)
+
+                self.Scroll1.config(command = self.T.yview)
+
+                Button(self.f1, text = "Cancel Order No.", command = self.CancelOrder).grid(row = 10, column = 2, sticky = NW)
+
+                Button(self.f1, text = "Modify Order No.", command = self.Modify).grid(row = 10, column = 2)
+
+                Button(self.f1, text = "Confirm Order No", command = self.Confirm).grid(row = 10, column = 2, sticky = NE)
+
+                # self.CO.grid(row = 9, column = 2, sticky = NW)
+                # self.MO.grid(row = 10, column = 2, sticky = NE)
+                self.ConfO.grid(row = 10, column = 3, sticky = NE)
+                Button(self.f1, text = "Refresh", command = self.Update).grid(row = 12, column = 2)
+
+
+            else:
+                msb.showinfo("Search Results", "Search Result not Found")
+
+        self.ES1.delete(0, 'end')
+        self.ES2.delete(0, 'end')
+        self.ES3.delete(0, 'end')
+        self.ES4.delete(0, 'end')
+
+    def Confirm(self):
+
+        order_no = self.confirm_order_no.get()
+
+        cur.execute("UPDATE ORDERS SET CONFIRM = 'YES' WHERE O_NO = '" + order_no + "'")
+
+        conn.commit()
+
+        self.ConfO.delete(0, END)
+
+        msb.showinfo("Order Confirmed", "Order No. " + order_no + " confirmed & Inventory updated succesfully") 
+
+
+    def CancelOrder(self):
+
+        self.T.delete(1.0, END)
+        self.T.grid_remove()
+        self.Scroll1.grid_remove()
+
+        self.c_o = self.confirm_order_no.get()
+
+        if len(self.c_o)>0:
+
+            cur.execute("DELETE FROM ORDERS WHERE O_NO = '" + self.c_o + "'")
+            conn.commit()
+
+            msb.showinfo("Cancel Order", f"Order No. : {self.c_o} has been cancelled !!!")
+
+            self.CO.delete(0, END)
+
+        else:
+            msb.showerror("Error Canceling Order", "Order No. can not be blank")
+
+    def Update(self):
+
+        cur.execute("SELECT O_NO FROM ORDERS")
+
+        row = cur.fetchall()
+
+        list = []
+
+        for i in row:
+            list.append(i[0])
+
+
+        for i in range(len(list)):
+            cur.execute("UPDATE ORDERS  SET O_NO = '" + str(i+1) + "'   WHERE O_NO = '" + str(list[i]) + "'")
+
+            conn.commit()
+
+        cur.execute("SELECT MAX(O_NO) FROM ORDERS")
+        a = cur.fetchall()
+        a = (a[0])[0]
+
+        cur.execute("SELECT MAX(O_NO) FROM ONO")
+        b = cur.fetchall()
+        b = (b[0])[0]
+
+        cur.execute("UPDATE ONO SET O_NO = '" + str(a) + "' WHERE O_NO = '" + str(b) + "'")
+        conn.commit()
+
+        cur.execute("SELECT * FROM ONO")
+        c = cur.fetchall()
+        c = (c[0])[0]
+
+
+
+        msb.showinfo("Order No. Updated.", "Order no. updation successfull")
+
+
+    def Modify(self):
+
+        self.mo = self.confirm_order_no.get()
+
+        if len(self.mo) < 1:
+            msb.showwarning("No Order Given", "Order No. can not be blank")
+        
+        else:
+            self.MFrame.grid_remove()
+            self.CFrame.grid_remove()
+            self.SFrame.grid()
+
+            try:
+                self.f1.grid_remove()
+            except:
+                pass
+
+            try:
+                self.f2.grid()
+
+                for i in self.f2.winfo_children():
+                    i.destroy()
+
+            except Exception as e:
+                if str(e) == "'_tkinter.tkapp' object has no attribute 'f2'":
+                    self.f2 = Frame(self.SFrame)
+                    self.f2.grid()
+
+            self.mo = self.modify_order_no.get()
+
+
+
+            try:
+                a = int(self.mo)
+
+                SEARCH = f"SELECT * FROM ORDERS WHERE O_NO = {self.mo}"
+
+            except Exception as e:
+                if "invalid literal for int() with base 10" in str(e):
+                    msb.showerror(" INVALID ORDER NO", "ORDER NO. must be INTEGER")
+
+            cur.execute(SEARCH)
+
+            self.row = cur.fetchall()[0]
+
+            self.CreateOrder(1)
+
+
+    def View(self):
+
+        self.MFrame.grid_remove()
+        self.CFrame.grid_remove()
+        self.SFrame.grid()
+
+
+        try:
+            self.f2.grid_remove()
+        except:
+            pass
+
+
+        self.f2 = Frame(self.SFrame)
+        self.f2.grid()
+
+
+        try:
+            self.f1.grid_remove()
+        except:
+            pass
+
+        cur.execute("SELECT * FROM ORDERS")
+
+
+        row = cur.fetchall()
+
+        if len(row)>0:
+
+
+            self.Scroll2 = Scrollbar(self.f2)
+
+
+            T = Text(self.f2, height = 37, yscrollcommand = self.Scroll2.set, font = (50))
+            T.delete(1.0, END)
+
+            result = ""
+
+            for i in row:
+                result = result + f"Booking No. :-  {i[1]}\n\n   Order ID				#FFV2021____{i[0]}\n   Name			:	{i[2]}\n   Phone No.			:	{i[3]}\n   Address			:	{i[4]}\n   Requirement			:	{i[5]}\n   Schedule For Daily			:	{i[6]}\n   Notes			:	{i[7]}\n   Time			:	{i[8]}\n\n\n"
+
+
+            T.insert(END, result)
+
+            T.config(state = DISABLED)
+            
+            T.grid(row = 1, column = 3, sticky = EW)
+
+            self.Scroll2.grid(row = 1, column = 4, sticky = N+S)
+            self.Scroll2.config(command = T.yview)
+
+        else:
+            msb.showinfo("All Orders", "No Orders To Show")
+    
+
+    def Inventory(self):
+
+        for i in self.MFrame.winfo_children():
+            i.destroy()
+        
+
+        Label(self.MFrame, text = "Fresh Fruits & Veggies", font = ("Segoe Print", 20, "bold"), pady = 20, padx = 10).grid(row = 0, column = 3)
+
+        Button(self.MFrame, text = "ADD PRODUCT ", width = 20, bg = "GREEN", fg = "WHITE", font = ("Calibri", 12, "bold"), command = self.AddProduct).grid(row = 4, column = 3)
+
+        Button(self.MFrame, text = "SEARCH PRODUCT", width = 20, bg = "ORANGE", fg = "BLACK", font = ("Calibri", 12, "bold"), command = self.SearchProduct).grid(row = 4, column = 5, pady = 5)
+
+        Button(self.MFrame, text = "DELETE PRODUCT", width = 20, bg = "RED", fg = "WHITE", font = ("Calibri", 12, "bold"), command = self.SearchProduct).grid(row = 6, column = 3)
+
+        Button(self.MFrame, text = "VIEW INVENTORY", width = 20, bg = "BLUE", fg = "WHITE", font = ("Calibri", 12, "bold"), command = self.ViewInventory).grid(row = 6, column = 5, pady = 5)
+
+        Button(self.MFrame, text = "MODIFY PRODUCT", width = 20, bg = "YELLOW", fg = "BLACK", font = ("Calibri", 12, "bold"), command = self.SearchProduct).grid(row = 7, column = 3, pady = 5)
+
+
+ 
+    def AddProduct(self):
+        for i in self.CFrame.winfo_children():
+            i.destroy()
+        
+        self.MFrame.grid_remove()
+        self.SFrame.grid_remove()
+        self.CFrame.grid()
+
+
+        self.P_Name = StringVar()
+        self.P_Brand = StringVar()
+        self.P_Des = StringVar()
+        self.P_Variant = StringVar()
+        self.P_Unit = StringVar()
+        self.P_Barcode = StringVar()
+        self.P_MRP = DoubleVar()
+        self.P_CPrice = DoubleVar()
+        self.P_Margin = DoubleVar()
+        self.P_SPrice = DoubleVar()
+        
+
+        self.E1 = Entry(self.CFrame, textvariable = self.P_Name,    width = 40    , borderwidth = 2, relief = GROOVE)
+        self.E2 = Entry(self.CFrame, textvariable = self.P_Brand,   width = 40    , borderwidth = 2, relief = GROOVE)
+        self.E3 = Entry(self.CFrame, textvariable = self.P_Des,     width = 40    , borderwidth = 2, relief = GROOVE)
+        self.E4 = Entry(self.CFrame, textvariable = self.P_Variant, width = 40    , borderwidth = 2, relief = GROOVE)
+        self.E5 = Entry(self.CFrame, textvariable = self.P_Unit,    width = 40    , borderwidth = 2, relief = GROOVE)
+        self.E6 = Entry(self.CFrame, textvariable = self.P_Barcode, width = 40    , borderwidth = 2, relief = GROOVE)
+        self.E7 = Entry(self.CFrame, textvariable = self.P_MRP,     width = 40    , borderwidth = 2, relief = GROOVE)
+        self.E8 = Entry(self.CFrame, textvariable = self.P_CPrice,  width = 40    , borderwidth = 2, relief = GROOVE)
+        self.E9 = Entry(self.CFrame, textvariable = self.P_Margin,  width = 40    , borderwidth = 2, relief = GROOVE)
+        self.E10 = Entry(self.CFrame, textvariable = self.P_SPrice,  width = 40    , borderwidth = 2, relief = GROOVE)
+
+
+        Label(self.CFrame, text = "     Fresh Fruits & Veggies", font = ("Segoe Print", 20, "bold"), pady = 20).grid(row = 0, column = 2, columnspan = 10, sticky = W)
+        Label(self.CFrame, text = "\t                    \t", font = "Calibri").grid(row = 2, column = 2)
+
+        Label(self.CFrame, text = "Product Name         \t: ", font = "Calibri").grid(row = 2, column = 2, sticky = "W")
+        self.E1.grid(row = 2, column = 3)
+        
+        Label(self.CFrame, text = "Product Brand        \t: ", font = "Calibri").grid(row = 3, column = 2, sticky = "W")
+        self.E2.grid(row = 3, column = 3)
+        
+        Label(self.CFrame, text = "Product Description  \t: ", font = "Calibri").grid(row = 4, column = 2, sticky = "W")
+        self.E3.grid(row = 4, column = 3)
+        
+        Label(self.CFrame, text = "Variant Name         \t: ", font = "Calibri").grid(row = 5, column = 2, sticky = "W")
+        self.E4.grid(row = 5, column = 3)
+
+        Label(self.CFrame, text = "Measuring Unit       \t: ", font = "Calibri").grid(row = 6, column = 2, sticky = "W")
+        self.E5.grid(row = 6, column = 3)
+        
+        Label(self.CFrame, text = "Bar Code             \t\t: ", font = "Calibri").grid(row = 7, column = 2, sticky = "W")
+        self.E6.grid(row = 7, column = 3)
+        
+        Label(self.CFrame, text = "MRP                  \t\t: ", font = "Calibri").grid(row = 8, column = 2, sticky = "W")
+        self.E7.grid(row = 8, column = 3)
+
+        Label(self.CFrame, text = "Cost Price           \t\t: ", font = "Calibri").grid(row = 9, column = 2, sticky = "W")
+        self.E8.grid(row = 9, column = 3)
+
+        Label(self.CFrame, text = "Margin               \t\t: ", font = "Calibri").grid(row = 10, column = 2, sticky = "W")
+        self.E9.grid(row = 10, column = 3)
+
+        Label(self.CFrame, text = "Selling Price        \t\t: ", font = "Calibri").grid(row = 11, column = 2, sticky = "W")
+        self.E10.grid(row = 11, column = 3)
+
+        Button(self.CFrame, text = "Save Product", bg = "YELLOW", command = self.CreateProduct).grid(row = 12, column = 2, columnspan = 2)
+    
+
+    def CreateProduct(self):
+
+
+        self.PName = self.P_Name.get().upper()
+        self.PBrand = self.P_Brand.get().upper()
+        self.PDes = self.P_Des.get().upper()
+        self.PVariant = self.P_Variant.get().upper()
+        self.PUnit = self.P_Unit.get().upper()
+        self.PBarcode = self.P_Barcode.get().upper()
+        self.PMRP = self.P_MRP.get()
+        self.PCPrice = self.P_CPrice.get()
+        self.PMargin = self.P_Margin.get()
+        self.PSPrie = self.P_SPrice.get()
+
+        
+
+
+
+
+
+
+
+        '''
+        
+        Create a function or a line of code to fetch last Product No. from Databbase & update the  Database accordingly.
+        P_ID   INTEGER     PRIMARY KEY     AUTOINCREMENT,
+        P_NO    INTEGER,
+        P_NAME  TEXT,
+        P_BRAND    TEXT,
+        P_DES   TEXT,
+        P_VARIANT   TEXT,
+        P_UNIT  TEXT,
+        P_BARCODE   TEXT,
+        P_MRP   REAL,
+        P_CPRICE    REAL,
+        P_MARGIN    REAL,
+        P_SPRICE    REAL,
+        QTY     REAL,
+        CHECK_QTY   REAL
+        '''
+
+        pass
+
+    def SearchProduct(self):
+        pass
+
+    def ViewInventory(self):
+        pass
+
+    def DeleteProduct(self):
+        pass
+
+
+
+def Order():
+    app = App()
+    app.mainloop()
+
+
+if __name__ == "__main__":
+
+    conn = sqlite3.connect("FRESH.db")
+
+    cur = conn.cursor()
+
+    create_table_orders = '''CREATE TABLE ORDERS
+        (O_ID   INTEGER     PRIMARY KEY     AUTOINCREMENT,
+        O_NO   INTEGER,
+        NAME    TEXT,
+        PHONE   TEXT,
+        ADDRESS     TEXT,
+        REQUIREMENT     TEXT,
+        DAILY   TEXT,
+        NOTES   TEXT,
+        TIME    TEXT,
+        CONFIRM     TEXT    DEFAULT     NO,
+        T TEXT);'''
+
+    try:
+        cur.execute(create_table_orders)
+        conn.commit()
+
+    except Exception as e:
+        if str(e) == "table ORDERS already exists":
+            pass
+
+        else:
+            print(e)
+            msb.showwarning("Connection", "Error !!! Database Connection Failed\n" + str(e))
+
+    try:
+        cur.execute('''CREATE TABLE ONO         (O_NO INTEGER )''')
+        cur.execute("INSERT INTO ONO (O_NO) VALUES(0)")
+        conn.commit()
+
+    except Exception as e:
+        if str(e) == "table ONO already exists":
+            pass
+
+        else:
+            print(e)
+            msb.showerror("Error", "Can't fetch Last Order No.")
+
+
+    create_table_inventory = ''' CREATE TABLE INVENTORY
+        P_ID   INTEGER     PRIMARY KEY     AUTOINCREMENT,
+        P_NO    INTEGER,
+        P_NAME  TEXT,
+        P_BRAND    TEXT,
+        P_DES   TEXT,
+        P_VARIANT   TEXT,
+        P_UNIT  TEXT,
+        P_BARCODE   TEXT,
+        P_MRP   REAL,
+        P_CPRICE    REAL,
+        P_MARGIN    REAL,
+        P_SPRICE    REAL,
+        QTY     REAL,
+        CHECK_QTY   REAL    
+        );'''
+    
+    try:
+        cur.execute(create_table_inventory)
+        conn.commit()
+
+    except Exception as e:
+        if str(e) == "table INVENTORY already exists":
+            pass
+
+        else:
+            print(e)
+            msb.showwarning("Connection", "Error !!! Database Connection Failed - INVENTORY\n" + str(e))
+
+    try:
+        cur.execute("CREATE TABLE PNO   (   P_NO   INTEGER  );")
+        cur.execute("INSERT INTO PNO    (P_NO)      VALUES(0)   ;")
+        conn.commit()
+
+    except Exception as e:
+        if str(e) == "table PNO already exists":
+            pass
+
+        else:
+            print(e)
+            msb.showwarning("Connection", "Error !!! Can't Fetch Last Order No. \n" + str(e))
+
+
+    Order()
